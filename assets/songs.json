@@ -1,0 +1,26 @@
+[
+  {
+    "title": "One More Time",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-e.dzcdn.net/stream/c-e77d23e0c8ed7567a507a6d1b6a9ca1b-11.mp3"
+  },
+  {
+    "title": "Aerodynamic",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-b.dzcdn.net/stream/c-b2e0166bba75a78251d6dca9c9c3b41a-9.mp3"
+  },
+  {
+    "title": "Face to Face",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-7.dzcdn.net/stream/c-7af918cb131b9d5b8f5c1e40e62da91b-10.mp3"
+  },
+  {
+    "title": "Short Circuit",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-6.dzcdn.net/stream/c-6ef3bfc9e8f226b582bade5842df4517-10.mp3"
+  }
+]
