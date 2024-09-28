@@ -22,5 +22,40 @@
     "artist": "Daft Punk",
     "albumArtUrl": "https://api.deezer.com/album/302127/image",
     "streamingUrl": "https://cdn-preview-6.dzcdn.net/stream/c-6ef3bfc9e8f226b582bade5842df4517-10.mp3"
+  },
+  {
+    "title": "Voyager",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-9.dzcdn.net/stream/c-98625d3ad54e88765fdfb812de62e515-9.mp3"
+  },
+  {
+    "title": "Veridis Quo",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-f.dzcdn.net/stream/c-f6fde4f6f42bde740e3d07b019fde318-8.mp3"
+  },
+  {
+    "title": "Too Long",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-d.dzcdn.net/stream/c-ddf495316e2afbe4327d9a6e17840a69-9.mp3"
+  },
+  {
+    "title": "Something About Us",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-9.dzcdn.net/stream/c-905aef3b23f4fb19db300a03f254fd6a-8.mp3"
+  },  {
+    "title": "High Life",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-8.dzcdn.net/stream/c-8052077a75a884e93bda2e2b63f74bbb-9.mp3"
+  },
+  {
+    "title": "Superheroes",
+    "artist": "Daft Punk",
+    "albumArtUrl": "https://api.deezer.com/album/302127/image",
+    "streamingUrl": "https://cdn-preview-3.dzcdn.net/stream/c-3d8caae0a1c59f417f31bb747c43818b-9.mp3"
   }
 ]

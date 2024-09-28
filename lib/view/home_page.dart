@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:audio_player/controller/audio_controller.dart';
+import 'package:audio_player/view/fullscreen_player.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -8,6 +9,7 @@ class HomePage extends StatelessWidget {
   HomePage({super.key});
   final AudioController controller = Get.put(AudioController());
   final TextEditingController search = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -36,68 +38,76 @@ class HomePage extends StatelessWidget {
         bottomNavigationBar: Obx(() {
           if (controller.currentSong.value == null) return SizedBox.shrink();
           return GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Get.to(FullScreenPlayer());
+            },
             child: Container(
               height: 60,
               color: Colors.deepPurple.shade500,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.network(
-                      controller.currentSong.value?.albumArtUrl ?? ''),
+                  Hero(
+                    tag: controller.currentSong.value!.albumArtUrl,
+                    child: Image.network(
+                        controller.currentSong.value!.albumArtUrl),
+                  ),
                   Text(
-                    controller.currentSong.value?.title ?? '',
+                    controller.currentSong.value!.title,
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.bold),
                   ),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.skip_previous_rounded,
-                          size: 30,
-                          color: Colors.white,
+                  Hero(
+                    tag: controller.currentSong.value!.title,
+                    child: Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.skip_previous_rounded,
+                            size: 30,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (controller.currentIndex.value - 1 >= 0) {
+                              controller.playPreviousSong(
+                                  controller.currentIndex.value - 1);
+                            }
+                          },
                         ),
-                        onPressed: () {
-                          if (controller.currentIndex.value - 1 >= 0) {
-                            controller.playPreviousSong(
-                                controller.currentIndex.value - 1);
-                          }
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          controller.isPlaying.value
-                              ? Icons.pause_rounded
-                              : Icons.play_arrow_rounded,
-                          size: 30,
-                          color: Colors.white,
+                        IconButton(
+                          icon: Icon(
+                            controller.isPlaying.value
+                                ? Icons.pause_rounded
+                                : Icons.play_arrow_rounded,
+                            size: 30,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (controller.isPlaying.value) {
+                              controller.pauseSong();
+                            } else {
+                              controller.resumeSong();
+                            }
+                          },
                         ),
-                        onPressed: () {
-                          if (controller.isPlaying.value) {
-                            controller.pauseSong();
-                          } else {
-                            controller.resumeSong();
-                          }
-                        },
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.skip_next_rounded,
-                          size: 30,
-                          color: Colors.white,
+                        IconButton(
+                          icon: Icon(
+                            Icons.skip_next_rounded,
+                            size: 30,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (controller.currentIndex.value + 1 <
+                                controller.songs.length) {
+                              controller.playNextSong(
+                                  controller.currentIndex.value + 1);
+                            }
+                          },
                         ),
-                        onPressed: () {
-                          if (controller.currentIndex.value + 1 <
-                              controller.songs.length) {
-                            controller.playNextSong(
-                                controller.currentIndex.value + 1);
-                          }
-                        },
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -109,13 +119,21 @@ class HomePage extends StatelessWidget {
             Padding(
               padding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
               child: TextFormField(
+                focusNode: FocusNode(onKeyEvent: (node, event) {
+                  searchFocusNode.unfocus();
+                  return KeyEventResult.handled;
+                },),
+                onChanged: (value) async {
+                  controller.isLoading.value = true;
+                  await Future.delayed(const Duration(seconds: 2));
+                  controller.filterSongs(search.text);
+                  controller.isLoading.value = false;
+                },
                 textAlign: TextAlign.start,
                 controller: search,
                 decoration: InputDecoration(
                   prefixIcon: IconButton(
-                      onPressed: () {
-                        controller.filterSongs(search.text);
-                      },
+                      onPressed: () {},
                       icon: Icon(
                         Icons.search,
                         size: 23,

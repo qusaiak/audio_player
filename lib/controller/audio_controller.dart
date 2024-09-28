@@ -14,12 +14,14 @@ class AudioController extends GetxController {
   final player = AudioPlayer();
   var currentIndex = 0.obs;
   var isLoading = true.obs;
+  var duration = Duration.zero.obs;
+  var position = Duration.zero.obs;
 
   @override
   void onInit() {
     super.onInit();
     fetchSongsFromJson();
-    _listenForCompletion();
+    listenForCompletion();
   }
 
   Future<void> fetchSongsFromJson() async {
@@ -41,7 +43,6 @@ class AudioController extends GetxController {
 
   void filterSongs(String search) async {
     isLoading(true);
-    await Future.delayed(const Duration(seconds: 2));
     if (search.isEmpty) {
       filteredSongs.value = songs;
     } else {
@@ -80,11 +81,20 @@ class AudioController extends GetxController {
     isPlaying.value = false;
   }
 
-  void _listenForCompletion() {
+  void listenForCompletion() {
     player.processingStateStream.listen((state) {
       if (state == ProcessingState.completed) {
         playNextSong(currentIndex.value + 1);
       }
+    });
+    player.durationStream.listen((newDuration) {
+      duration.value = newDuration!;
+      update();
+    });
+    player.positionStream.listen((newPosition) {
+      position.value = newPosition;
+
+      update();
     });
   }
 
@@ -97,11 +107,18 @@ class AudioController extends GetxController {
   }
 
   void playPreviousSong(int previousIndex) {
-    if (previousIndex >= 0 ) {
+    if (previousIndex >= 0) {
       playSong(previousIndex);
     } else {
       stopSong();
     }
   }
 
+  String formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    final hours = twoDigits(duration.inHours.remainder(60));
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$hours:$minutes:$seconds";
+  }
 }
