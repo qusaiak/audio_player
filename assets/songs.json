@@ -46,7 +46,8 @@
     "artist": "Daft Punk",
     "albumArtUrl": "https://api.deezer.com/album/302127/image",
     "streamingUrl": "https://cdn-preview-9.dzcdn.net/stream/c-905aef3b23f4fb19db300a03f254fd6a-8.mp3"
-  },  {
+  },
+  {
     "title": "High Life",
     "artist": "Daft Punk",
     "albumArtUrl": "https://api.deezer.com/album/302127/image",

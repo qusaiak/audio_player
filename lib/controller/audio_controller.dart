@@ -1,53 +1,56 @@
 // ignore_for_file: avoid_print
 import 'dart:convert';
 
-import 'package:audio_player/model/song_model.dart';
-import 'package:flutter/services.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 
 class AudioController extends GetxController {
-  var songs = <SongModel>[].obs;
-  var filteredSongs = <SongModel>[].obs;
+    // var songs = [].obs;
+    // var filteredSongs = [].obs;
+  var songs = [];
+  var filteredSongs = [];
   var isPlaying = false.obs;
-  var currentSong = Rxn<SongModel>();
   final player = AudioPlayer();
   var currentIndex = 0.obs;
   var isLoading = true.obs;
+  var play = false.obs;
   var duration = Duration.zero.obs;
   var position = Duration.zero.obs;
-
+  var title = 't'.obs;
   @override
-  void onInit() {
+  Future<void> onInit() async {
     super.onInit();
-    fetchSongsFromJson();
-    listenForCompletion();
+    getSongsFromAPI();
+    await listenForCompletion();
+    // fetchSongsFromJson();
   }
 
-  Future<void> fetchSongsFromJson() async {
-    try {
-      isLoading(true);
-      await Future.delayed(const Duration(seconds: 3));
-      final String response = await rootBundle.loadString('assets/songs.json');
-      final List<dynamic> jsonData = jsonDecode(response);
-      songs.value =
-          jsonData.map((songJson) => SongModel.fromJson(songJson)).toList();
-      filteredSongs.value = songs;
-    } catch (e) {
-      print('Error loading songs: $e');
-    } finally {
-      isLoading(false);
-    }
-    update();
-  }
+  // Future<void> fetchSongsFromJson() async {
+  //   try {
+  //     isLoading(true);
+  //     await Future.delayed(const Duration(seconds: 3));
+  //     final String response = await rootBundle.loadString('assets/songs.json');
+  //     final List<dynamic> jsonData = jsonDecode(response);
+  //     songs.value =
+  //         jsonData.map((songJson) => SongModel.fromJson(songJson)).toList();
+  //     filteredSongs.value = songs;
+  //   } catch (e) {
+  //     print('Error loading songs: $e');
+  //   } finally {
+  //     isLoading(false);
+  //   }
+  //   update();
+  // }
 
   void filterSongs(String search) async {
     isLoading(true);
     if (search.isEmpty) {
-      filteredSongs.value = songs;
+      filteredSongs = songs;
     } else {
-      filteredSongs.value = songs.where((song) {
-        return song.title.toLowerCase().contains(search.toLowerCase());
+      filteredSongs = songs.where((song) {
+        return song['title'].toLowerCase().contains(search.toLowerCase());
       }).toList();
     }
     isLoading(false);
@@ -55,63 +58,84 @@ class AudioController extends GetxController {
   }
 
   Future<void> playSong(int index) async {
-    currentSong.value = songs[index];
     currentIndex.value = index;
+    title.value = songs[index]['title'];
+    play.value = true;
+    update();
     try {
-      await player.setUrl(songs[index].streamingUrl);
+      await player.setAudioSource(AudioSource.uri(
+        Uri.parse(songs[index]['preview']),
+        tag: MediaItem(
+          id: "$index",
+          title: title.value,
+          artist: songs[index]['artist']['name'],
+          artUri: Uri.parse("https://api.deezer.com/album/302127/image"),
+          duration: duration.value,
+        ),
+      ));
       player.play();
-      isPlaying(true);
     } catch (e) {
       print("Error playing song: $e");
+    } finally {
+      isPlaying(true);
+      update();
     }
   }
 
   void pauseSong() {
     player.pause();
     isPlaying.value = false;
+    update();
   }
 
   void resumeSong() {
     player.play();
     isPlaying.value = true;
+    update();
   }
 
   void stopSong() {
     player.stop();
     isPlaying.value = false;
+    update();
   }
 
-  void listenForCompletion() {
-    player.processingStateStream.listen((state) {
+  Future<void> listenForCompletion() async {
+    player.processingStateStream.listen((state) async {
       if (state == ProcessingState.completed) {
-        playNextSong(currentIndex.value + 1);
+        await Future.delayed(const Duration(seconds: 3));
+        await playNextSong(currentIndex.value + 1);
+        await Future.delayed(const Duration(seconds: 3));
       }
     });
     player.durationStream.listen((newDuration) {
-      duration.value = newDuration!;
-      update();
+      if (newDuration != null) {
+        duration.value = newDuration;
+        update();
+      }
     });
     player.positionStream.listen((newPosition) {
       position.value = newPosition;
-
       update();
     });
   }
 
-  void playNextSong(int nextIndex) {
+  Future<void> playNextSong(int nextIndex) async {
     if (nextIndex < songs.length) {
-      playSong(nextIndex);
+      await playSong(nextIndex);
     } else {
       stopSong();
     }
+    update();
   }
 
-  void playPreviousSong(int previousIndex) {
+  void playPreviousSong(int previousIndex) async {
     if (previousIndex >= 0) {
-      playSong(previousIndex);
+      await playSong(previousIndex);
     } else {
       stopSong();
     }
+    update();
   }
 
   String formatDuration(Duration duration) {
@@ -120,5 +144,27 @@ class AudioController extends GetxController {
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     return "$hours:$minutes:$seconds";
+  }
+
+  Future<void> getSongsFromAPI() async {
+    try {
+      isLoading(true);
+      await Future.delayed(const Duration(seconds: 3));
+      final response = await http
+          .get(Uri.parse('https://api.deezer.com/album/302127/tracks'));
+      if (response.statusCode == 200) {
+        var jsonData = jsonDecode(response.body);
+        songs = jsonData['data'];
+        filteredSongs = songs;
+        update();
+      } else {
+        print('Failed to load songs: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error fetching songs from API: $e');
+    } finally {
+      isLoading(false);
+    }
+    update();
   }
 }

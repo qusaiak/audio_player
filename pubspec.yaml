@@ -40,6 +40,9 @@ dependencies:
   google_nav_bar: ^5.0.6
   http: ^1.2.2
   audio_service: ^0.18.15
+  shared_preferences: ^2.3.2
+  just_audio_background: ^0.0.1-beta.13
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

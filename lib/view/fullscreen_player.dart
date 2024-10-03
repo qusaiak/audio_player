@@ -36,17 +36,17 @@ class FullScreenPlayer extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 25, bottom: 20),
                 child: Hero(
-                  tag: controller.currentSong.value!.albumArtUrl,
+                  tag: "1",
                   child: CircleAvatar(
                       radius: MediaQuery.sizeOf(context).height / 6,
                       backgroundImage: NetworkImage(
-                          controller.currentSong.value!.albumArtUrl)),
+                          "https://api.deezer.com/album/302127/image")),
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: Text(
-                  controller.currentSong.value!.title,
+                  controller.title.value,
                   style: TextStyle(
                       fontSize: 20,
                       color: Colors.white,
@@ -54,23 +54,21 @@ class FullScreenPlayer extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top: 8,bottom: 10),
+                padding: const EdgeInsets.only(top: 8, bottom: 10),
                 child: Text(
-                  controller.currentSong.value!.artist,
+                  controller.songs[controller.currentIndex.value]['artist']
+                      ['name'],
                   style: TextStyle(
                       fontSize: 15,
                       color: Colors.white,
                       fontWeight: FontWeight.w400),
                 ),
               ),
-              
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 25,horizontal: 5),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("${controller.formatDuration(controller.position.value)}",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold),),
-                    Slider(
+              Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 35),
+                    child: Slider(
                         min: 0,
                         max: controller.duration.value.inSeconds.toDouble(),
                         value: controller.position.value.inSeconds.toDouble(),
@@ -78,13 +76,29 @@ class FullScreenPlayer extends StatelessWidget {
                           final position = Duration(seconds: value.toInt());
                           controller.player.seek(position);
                         }),
-                    Text(
-                        "${controller.formatDuration((controller.duration.value - controller.position.value))}",style: TextStyle(color: Colors.white,fontWeight: FontWeight.bold)),
-                  ],
-                ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 50),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text(
+                          "${controller.formatDuration(controller.position.value)}",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                            "${controller.formatDuration((controller.duration.value - controller.position.value))}",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               Hero(
-                tag: controller.currentSong.value!.title,
+                tag: '2',
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -104,9 +118,9 @@ class FullScreenPlayer extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         controller.isPlaying.value
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        size: 45,
+                            ? Icons.pause_circle_rounded
+                            : Icons.play_circle_fill_rounded,
+                        size: 50,
                         color: Colors.deepPurple.shade800,
                       ),
                       onPressed: () {
