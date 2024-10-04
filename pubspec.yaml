@@ -43,6 +43,7 @@ dependencies:
   shared_preferences: ^2.3.2
   just_audio_background: ^0.0.1-beta.13
   permission_handler: ^11.3.1
+  miniplayer: ^1.0.1
 
 dev_dependencies:
   flutter_test:

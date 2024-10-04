@@ -7,23 +7,26 @@ import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 
 class AudioController extends GetxController {
-    // var songs = [].obs;
-    // var filteredSongs = [].obs;
+  List<AudioSource> songsList = [];
   var songs = [];
   var filteredSongs = [];
   var isPlaying = false.obs;
   final player = AudioPlayer();
   var currentIndex = 0.obs;
+  var currentSongTitle = ''.obs;
   var isLoading = true.obs;
   var play = false.obs;
   var duration = Duration.zero.obs;
   var position = Duration.zero.obs;
   var title = 't'.obs;
+
   @override
   Future<void> onInit() async {
     super.onInit();
     getSongsFromAPI();
     await listenForCompletion();
+    listenForSongChanges();
+    listenForPlaybackState();
     // fetchSongsFromJson();
   }
 
@@ -59,21 +62,13 @@ class AudioController extends GetxController {
 
   Future<void> playSong(int index) async {
     currentIndex.value = index;
-    title.value = songs[index]['title'];
     play.value = true;
     update();
     try {
-      await player.setAudioSource(AudioSource.uri(
-        Uri.parse(songs[index]['preview']),
-        tag: MediaItem(
-          id: "$index",
-          title: title.value,
-          artist: songs[index]['artist']['name'],
-          artUri: Uri.parse("https://api.deezer.com/album/302127/image"),
-          duration: duration.value,
-        ),
-      ));
+      await player.setAudioSource(
+          initialIndex: index, ConcatenatingAudioSource(children: songsList));
       player.play();
+      update();
     } catch (e) {
       print("Error playing song: $e");
     } finally {
@@ -106,6 +101,7 @@ class AudioController extends GetxController {
         await Future.delayed(const Duration(seconds: 3));
         await playNextSong(currentIndex.value + 1);
         await Future.delayed(const Duration(seconds: 3));
+        update();
       }
     });
     player.durationStream.listen((newDuration) {
@@ -121,21 +117,20 @@ class AudioController extends GetxController {
   }
 
   Future<void> playNextSong(int nextIndex) async {
-    if (nextIndex < songs.length) {
-      await playSong(nextIndex);
-    } else {
-      stopSong();
-    }
+    await player.seekToNext();
+    await player.play();
     update();
   }
 
-  void playPreviousSong(int previousIndex) async {
-    if (previousIndex >= 0) {
-      await playSong(previousIndex);
-    } else {
-      stopSong();
+  Future<void> playPreviousSong() async {
+    final currentIndex = player.currentIndex;
+    if (currentIndex != null && currentIndex > 0) {
+      await player.seekToPrevious();
+      if (!player.playing) {
+        await player.play();
+      }
+      update();
     }
-    update();
   }
 
   String formatDuration(Duration duration) {
@@ -156,6 +151,18 @@ class AudioController extends GetxController {
         var jsonData = jsonDecode(response.body);
         songs = jsonData['data'];
         filteredSongs = songs;
+        songsList = songs.map((songUrl) {
+          return AudioSource.uri(
+            Uri.parse(songUrl['preview']),
+            tag: MediaItem(
+              id: songUrl['preview'],
+              title: songUrl['title'],
+              artist: songUrl['artist']['name'],
+              artUri: Uri.parse("https://api.deezer.com/album/302127/image"),
+              duration: duration.value,
+            ),
+          );
+        }).toList();
         update();
       } else {
         print('Failed to load songs: ${response.statusCode}');
@@ -166,5 +173,29 @@ class AudioController extends GetxController {
       isLoading(false);
     }
     update();
+  }
+
+  void getCurrentSongTitle(int? index) {
+    if (index != null && index < songsList.length) {
+      final currentSource = songsList[index];
+      if (currentSource is UriAudioSource) {
+        final mediaItem = currentSource.tag as MediaItem;
+        currentSongTitle.value = mediaItem.title;
+      }
+    } else {
+      currentSongTitle.value = '';
+    }
+  }
+
+  void listenForSongChanges() {
+    player.currentIndexStream.listen((index) {
+      getCurrentSongTitle(index);
+    });
+  }
+
+  void listenForPlaybackState() {
+    player.playingStream.listen((isPlayingNow) {
+      isPlaying.value = isPlayingNow;
+    });
   }
 }

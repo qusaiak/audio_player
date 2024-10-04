@@ -85,7 +85,7 @@ class HomePage extends StatelessWidget {
                       child: Padding(
                         padding: EdgeInsets.only(left: 10),
                         child: Text(
-                          controller.title.value,
+                          controller.currentSongTitle.value,
                           style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
@@ -106,10 +106,7 @@ class HomePage extends StatelessWidget {
                               color: Colors.white,
                             ),
                             onPressed: () {
-                              if (controller.currentIndex.value - 1 >= 0) {
-                                controller.playPreviousSong(
-                                    controller.currentIndex.value - 1);
-                              }
+                              controller.playPreviousSong();
                             },
                           ),
                           IconButton(

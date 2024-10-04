@@ -46,7 +46,7 @@ class FullScreenPlayer extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: Text(
-                  controller.title.value,
+                  controller.currentSongTitle.value,
                   style: TextStyle(
                       fontSize: 20,
                       color: Colors.white,
@@ -109,10 +109,7 @@ class FullScreenPlayer extends StatelessWidget {
                         color: Colors.deepPurple.shade800,
                       ),
                       onPressed: () {
-                        if (controller.currentIndex.value - 1 >= 0) {
-                          controller.playPreviousSong(
-                              controller.currentIndex.value - 1);
-                        }
+                        controller.playPreviousSong();
                       },
                     ),
                     IconButton(
